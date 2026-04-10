@@ -1,25 +1,37 @@
 #!/bin/zsh
 
-# =====================
-# GSO Forensics macOS DFIR Triage version 1.0
-# =====================
+# ========================
+# DFIR Triage version 1.0
+# ========================
 # Author: Alwin Espiritu
 # Description: Lightweight macOS DFIR triage script for rapid incident response collection
 
 echo "=============================================="
-echo "GSO Forensics macOS DFIR Triage version 1.0"
+echo "GSO Forensics macOS DFIR Triage version 1.1"
 echo "=============================================="
 
 # ----------------------
-# 1. Check for sudo/root
+# 1. Check if script is executable
 # ----------------------
-if [[ "$EUID" -ne 0 ]]; then
-  echo "[!] Not running as root. Please rerun with sudo."
+if [[ ! -x "$0" ]]; then
+  echo "[!] Script is not executable."
+  echo "[*] Run the following command first:"
+  echo "    chmod +x $0"
   exit 1
 fi
 
 # ----------------------
-# 2. Output Folder
+# 2. Check for sudo/root
+# ----------------------
+if [[ "$EUID" -ne 0 ]]; then
+  echo "[!] This script must be run with sudo."
+  echo "[*] Please run:"
+  echo "    sudo $0"
+  exit 1
+fi
+
+# ----------------------
+# 3. Output Folder
 # ----------------------
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FOLDER_TIMESTAMP="$(date '+%Y-%m-%d_%H-%M-%S')"
@@ -30,7 +42,7 @@ mkdir -p "$OUTPUT_DIR"
 echo "[*] IR Collection started at: $(date '+%Y-%m-%d %H:%M:%S')"
 
 # ----------------------
-# 3. Command Runner
+# 4. Command Runner
 # ----------------------
 run_cmd() {
   local name="$1"
@@ -55,7 +67,7 @@ run_cmd() {
 }
 
 # ----------------------
-# 4. SYSTEM INFORMATION
+# 5. SYSTEM INFORMATION
 # ----------------------
 run_cmd "hostname" "hostname"
 run_cmd "sw_vers" "sw_vers"
@@ -69,7 +81,7 @@ run_cmd "diskutil_list" "diskutil list"
 run_cmd "mounted_volumes" "mount"
 
 # ----------------------
-# 5. USER ENUMERATION
+# 6. USER ENUMERATION
 # ----------------------
 run_cmd "who" "who"
 run_cmd "w" "w"
@@ -79,14 +91,14 @@ run_cmd "local_users" "dscl . list /Users"
 run_cmd "admin_group" "dscl . -read /Groups/admin GroupMembership"
 
 # ----------------------
-# 6. PROCESS COLLECTION
+# 7. PROCESS COLLECTION
 # ----------------------
 run_cmd "process_list" "ps auxww"
 run_cmd "process_tree" "ps -axo pid,ppid,user,command"
 run_cmd "launchctl_list" "launchctl list"
 
 # ----------------------
-# 7. NETWORK INFORMATION
+# 8. NETWORK INFORMATION
 # ----------------------
 run_cmd "netstat_anv" "netstat -anv"
 run_cmd "lsof_network" "lsof -nP -i"
@@ -97,7 +109,7 @@ run_cmd "dns_configuration" "scutil --dns"
 run_cmd "hosts_file" "cat /etc/hosts"
 
 # ----------------------
-# 8. PERSISTENCE CHECKS
+# 9. PERSISTENCE CHECKS
 # ----------------------
 run_cmd "launch_agents_user_listing" "find /Users -path '*/Library/LaunchAgents/*' -maxdepth 4 -type f 2>/dev/null"
 run_cmd "launch_agents_system_listing" "find /Library/LaunchAgents -type f 2>/dev/null"
@@ -110,20 +122,20 @@ run_cmd "at_jobs" "atq 2>/dev/null"
 run_cmd "periodic_conf" "cat /etc/crontab 2>/dev/null; echo; ls -la /etc/periodic 2>/dev/null"
 
 # ----------------------
-# 9. PLIST / PERSISTENCE CONTENT
+# 10. PLIST / PERSISTENCE CONTENT
 # ----------------------
 run_cmd "launch_agents_system_content" "for f in /Library/LaunchAgents/*.plist(N); do echo '=====' \$f '====='; plutil -p \$f 2>/dev/null; done"
 run_cmd "launch_daemons_content" "for f in /Library/LaunchDaemons/*.plist(N); do echo '=====' \$f '====='; plutil -p \$f 2>/dev/null; done"
 
 # ----------------------
-# 10. INSTALLED SOFTWARE
+# 11. INSTALLED SOFTWARE
 # ----------------------
 run_cmd "applications_listing" "find /Applications -maxdepth 2 -name '*.app' 2>/dev/null"
 run_cmd "system_profiler_apps" "system_profiler SPApplicationsDataType"
 run_cmd "pkgutil_packages" "pkgutil --pkgs"
 
 # ----------------------
-# 11. USER ACTIVITY
+# 12. USER ACTIVITY
 # ----------------------
 run_cmd "zsh_history_all_users" "for h in /Users/*/.zsh_history(N); do echo '=====' \$h '====='; cat \$h; echo; done"
 run_cmd "bash_history_all_users" "for h in /Users/*/.bash_history(N); do echo '=====' \$h '====='; cat \$h; echo; done"
@@ -132,20 +144,20 @@ run_cmd "downloads_listing" "find /Users -path '*/Downloads/*' -maxdepth 3 2>/de
 run_cmd "documents_listing" "find /Users -path '*/Documents/*' -maxdepth 3 2>/dev/null"
 
 # ----------------------
-# 12. LOG COLLECTION
+# 13. LOG COLLECTION
 # ----------------------
 run_cmd "unified_log_recent" "log show --style syslog --last 2h 2>/dev/null | head -n 5000"
 run_cmd "install_log" "cat /var/log/install.log 2>/dev/null | tail -n 500"
 run_cmd "system_log_tail" "log show --style syslog --last 1h --predicate 'eventMessage contains[c] \"error\" OR eventMessage contains[c] \"failed\"' 2>/dev/null | head -n 3000"
 
 # ----------------------
-# 13. SAFARI / BROWSER BASIC ARTIFACTS
+# 14. SAFARI / BROWSER BASIC ARTIFACTS
 # ----------------------
 run_cmd "safari_history_files" "find /Users -path '*/Library/Safari/*' 2>/dev/null"
 run_cmd "browser_support_files" "find /Users -path '*/Library/Application Support/Google/Chrome/*' -o -path '*/Library/Application Support/Firefox/*' 2>/dev/null"
 
 # ----------------------
-# 14. FILE SYSTEM COLLECTION
+# 15. FILE SYSTEM COLLECTION
 # ----------------------
 echo "[*] Processing: file_listing_users (this may take a while...)"
 FILE_LIST_CSV="$OUTPUT_DIR/file_listing_users.csv"
@@ -163,7 +175,7 @@ else
 fi
 
 # ----------------------
-# 15. SECURITY / EXTENSIONS
+# 16. SECURITY / EXTENSIONS
 # ----------------------
 run_cmd "loaded_kexts" "kextstat 2>/dev/null"
 run_cmd "system_extensions" "systemextensionsctl list 2>/dev/null"
@@ -171,7 +183,7 @@ run_cmd "profiles_status" "profiles status -type enrollment 2>/dev/null; echo; p
 run_cmd "spctl_assessments" "spctl --status 2>/dev/null"
 
 # ----------------------
-# 16. HASH OUTPUT FILES
+# 17. HASH OUTPUT FILES
 # ----------------------
 echo "[*] Processing: hashes"
 HASH_FILE="$OUTPUT_DIR/hashes.txt"
@@ -190,7 +202,7 @@ else
 fi
 
 # ----------------------
-# 17. ZIP OUTPUT
+# 18. ZIP OUTPUT
 # ----------------------
 echo "[*] Processing: zip_archive"
 ZIP_FILE="${OUTPUT_DIR}.zip"
@@ -203,7 +215,7 @@ else
 fi
 
 # ----------------------
-# 18. COMPLETE
+# 19. COMPLETE
 # ----------------------
 echo ""
 echo "[+] IR Collection Complete at: $(date '+%Y-%m-%d %H:%M:%S')"
