@@ -6,9 +6,9 @@
 # Author: Alwin Espiritu
 # Description: Lightweight macOS DFIR triage script for rapid incident response collection
 
-echo "=============================================="
-echo "GSO Forensics macOS DFIR Triage version 1.1"
-echo "=============================================="
+echo "==============================="
+echo "macOS DFIR Triage version 1.1"
+echo "==============================="
 
 # ----------------------
 # 1. Check if script is executable
