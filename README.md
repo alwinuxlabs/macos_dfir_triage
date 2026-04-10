@@ -1,4 +1,4 @@
-# 🍎 macOS DFIR Triage Script v1.0
+# 🍎 macOS DFIR Triage Script v1.1
 
 Lightweight zsh-based DFIR triage script for rapid incident response collection on macOS systems.
 
@@ -18,14 +18,27 @@ Unauthorized use may violate applicable laws and regulations.
 
 ## 🚀 Quick Start
 
-```bash id="mac1"
+1. Clone the repository:
+
+```bash
 git clone https://github.com/alwinuxlabs/macos-dfir-triage.git
 cd macos-dfir-triage
+```
+
+2. Make the script executable:
+
+```bash
 chmod +x ./macos-dfir-triage.sh
+```
+
+3. Run the script with elevated privileges:
+
+```bash
 sudo ./macos-dfir-triage.sh
 ```
 
-> 🔐 Root privileges (`sudo`) are required for comprehensive artifact collection.
+> 🔐 Root privileges (`sudo`) are required for more complete artifact collection.
+> ⚙️ The script also checks whether it is executable and whether it is running with sufficient privileges.
 
 ---
 
@@ -46,11 +59,16 @@ sudo ./macos-dfir-triage.sh
   * LaunchDaemons
   * Login items
   * Cron jobs / periodic tasks
-* Installed applications and packages
+* Persistence plist content collection
+* Installed applications and package inventory
 * Event and unified log collection
 * Shell history collection (zsh, bash)
-* User activity (recent files, downloads, documents)
-* Browser artifact discovery (Safari, Chrome, Firefox paths)
+* User activity collection:
+
+  * recent items
+  * downloads
+  * documents
+* Browser artifact path discovery (Safari, Chrome, Firefox)
 * File system triage for `/Users`
 * Environment variables and mounted volumes
 * Kernel extensions and system extensions
@@ -61,7 +79,7 @@ sudo ./macos-dfir-triage.sh
 
 ## ⚙️ Requirements
 
-* macOS (tested on modern versions)
+* macOS
 * zsh shell
 * Root privileges (`sudo`)
 
@@ -71,7 +89,7 @@ sudo ./macos-dfir-triage.sh
 
 The script generates a timestamped directory:
 
-```text id="mac2"
+```text
 DFIR_Output_YYYY-MM-DD_HH-MM-SS
 ```
 
@@ -83,8 +101,8 @@ Each file includes:
 
 Additionally:
 
-* 📦 A compressed archive (`.zip`) of the output is created
-* 🔐 SHA256 hashes are generated for integrity verification
+* A compressed archive (`.zip`) of the output is created
+* SHA256 hashes are generated for integrity verification
 
 ---
 
@@ -150,7 +168,7 @@ Additionally:
 
 ---
 
-### 🧠 Persistence Content (Plist Analysis)
+### 🧠 Persistence Content
 
 * `launch_agents_system_content.txt`
 * `launch_daemons_content.txt`
@@ -208,7 +226,8 @@ Additionally:
 
 ### 🔐 Integrity
 
-* `hashes.txt` (SHA256 hashes of collected files)
+* `hashes.txt`
+  *(SHA256 hashes of collected files)*
 
 ---
 
@@ -220,10 +239,10 @@ Additionally:
 
 ## ⚠️ Notes & Limitations
 
-* Some macOS privacy controls (TCC) may restrict access to certain user data
-* Unified logs can be large; output is limited for performance
+* Some macOS privacy controls may restrict access to certain user data even when running with `sudo`
+* Unified logs can be large, so output is intentionally limited for performance
 * File system triage for `/Users` may take time depending on system size
-* Requires root privileges for full visibility
+* Some commands may return less data depending on macOS version and security settings
 * Designed for **triage collection**, not full forensic imaging
 
 ---
@@ -241,11 +260,11 @@ Additionally:
 
 * Review `lsof_network.txt` for suspicious network connections
 * Analyze `process_tree.txt` for unusual parent-child relationships
-* Inspect LaunchAgents/Daemons for persistence mechanisms
-* Check `zsh_history_all_users.txt` for attacker commands
+* Inspect LaunchAgents and LaunchDaemons for persistence mechanisms
+* Check `zsh_history_all_users.txt` and `bash_history_all_users.txt` for suspicious commands
 * Review `unified_log_recent.txt` for system and process activity
-* Investigate `hosts_file.txt` for DNS manipulation
-* Look at `pkgutil_packages.txt` for suspicious installs
+* Investigate `hosts_file.txt` for possible DNS manipulation
+* Look at `pkgutil_packages.txt` and `applications_listing.txt` for suspicious installs
 
 ---
 
@@ -260,4 +279,3 @@ MIT License
 Built for DFIR practitioners and security teams to accelerate macOS live response and triage investigations.
 
 ---
-# macos_dfir_triage
