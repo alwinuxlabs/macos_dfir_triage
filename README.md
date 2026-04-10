@@ -1,4 +1,4 @@
-# 🍎 macOS DFIR Triage Script v1.0
+# 🍎 macOS DFIR Triage Script v1.1
 
 Lightweight zsh-based DFIR triage script for rapid incident response collection on macOS systems.
 
